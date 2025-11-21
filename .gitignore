@@ -44,3 +44,6 @@ src-tauri/icons/StoreLogo.png
 *.dmg
 *.app
 *.AppImage
+
+# Release folder (for GitHub releases)
+release/
