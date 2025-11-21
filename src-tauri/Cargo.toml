@@ -1,0 +1,25 @@
+[package]
+name = "password-maker"
+version = "0.1.0"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[dependencies]
+rand = "0.8"
+base64 = "0.21"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+argon2 = "0.5"
+aes-gcm = "0.10"
+aead = "0.5"
+hex = "0.4"
+
+[dependencies.tauri]
+version = "1.5"
+features = [ "clipboard-all", "shell-open", "fs-all", "dialog-all"]
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]
