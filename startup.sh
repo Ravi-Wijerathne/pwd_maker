@@ -49,6 +49,15 @@ detect_os() {
         if [ -f /etc/os-release ]; then
             . /etc/os-release
             DISTRO=$ID
+            # Linux Mint is based on Ubuntu/Debian
+            if [ "$ID" = "linuxmint" ]; then
+                DISTRO="ubuntu"
+                print_info "Detected Linux Mint (using Ubuntu package management)"
+            fi
+            # Pop!_OS is based on Ubuntu
+            if [ "$ID" = "pop" ]; then
+                DISTRO="ubuntu"
+            fi
         else
             DISTRO="unknown"
         fi
@@ -153,9 +162,11 @@ check_linux_deps() {
             "file"
             "libssl-dev"
             "libgtk-3-dev"
-            "libwebkit2gtk-4.0-dev"
+            "libwebkit2gtk-4.1-dev"
             "libayatana-appindicator3-dev"
             "librsvg2-dev"
+            "libsoup2.4-dev"
+            "libjavascriptcoregtk-4.1-dev"
         )
         
         print_info "Checking required packages for Tauri on Debian/Ubuntu..."
@@ -176,6 +187,31 @@ check_linux_deps() {
         else
             print_success "All required Linux packages are installed"
         fi
+        
+        # Create webkit compatibility symlinks for Tauri 1.x
+        print_info "Checking webkit compatibility symlinks..."
+        
+        if [ ! -f "/usr/lib/x86_64-linux-gnu/pkgconfig/webkit2gtk-4.0.pc" ]; then
+            print_info "Creating webkit2gtk-4.0 pkg-config symlink..."
+            sudo ln -sf /usr/lib/x86_64-linux-gnu/pkgconfig/webkit2gtk-4.1.pc /usr/lib/x86_64-linux-gnu/pkgconfig/webkit2gtk-4.0.pc
+        fi
+        
+        if [ ! -f "/usr/lib/x86_64-linux-gnu/pkgconfig/javascriptcoregtk-4.0.pc" ]; then
+            print_info "Creating javascriptcoregtk-4.0 pkg-config symlink..."
+            sudo ln -sf /usr/lib/x86_64-linux-gnu/pkgconfig/javascriptcoregtk-4.1.pc /usr/lib/x86_64-linux-gnu/pkgconfig/javascriptcoregtk-4.0.pc
+        fi
+        
+        if [ ! -f "/usr/lib/x86_64-linux-gnu/libwebkit2gtk-4.0.so" ]; then
+            print_info "Creating webkit2gtk-4.0 library symlink..."
+            sudo ln -sf /usr/lib/x86_64-linux-gnu/libwebkit2gtk-4.1.so /usr/lib/x86_64-linux-gnu/libwebkit2gtk-4.0.so
+        fi
+        
+        if [ ! -f "/usr/lib/x86_64-linux-gnu/libjavascriptcoregtk-4.0.so" ]; then
+            print_info "Creating javascriptcoregtk-4.0 library symlink..."
+            sudo ln -sf /usr/lib/x86_64-linux-gnu/libjavascriptcoregtk-4.1.so /usr/lib/x86_64-linux-gnu/libjavascriptcoregtk-4.0.so
+        fi
+        
+        print_success "Webkit compatibility configured"
     elif [ "$DISTRO" = "fedora" ] || [ "$DISTRO" = "rhel" ] || [ "$DISTRO" = "centos" ]; then
         REQUIRED_PACKAGES=(
             "gcc"
@@ -274,6 +310,25 @@ check_project_structure() {
     print_success "Project structure is valid"
 }
 
+# Generate Tauri icons if missing
+generate_tauri_icons() {
+    print_info "Checking Tauri application icons..."
+    
+    if [ ! -f "src-tauri/icons/32x32.png" ] || [ ! -f "src-tauri/icons/icon.ico" ]; then
+        if [ -f "src-tauri/icons/icon.png" ]; then
+            print_info "Generating required icon sizes..."
+            cd src-tauri
+            npx @tauri-apps/cli icon icons/icon.png >/dev/null 2>&1
+            cd ..
+            print_success "Icons generated successfully"
+        else
+            print_warning "Base icon not found. Application may fail to build."
+        fi
+    else
+        print_success "Application icons are present"
+    fi
+}
+
 # Check npm and install dependencies
 check_npm_dependencies() {
     print_info "Checking npm dependencies..."
@@ -296,8 +351,13 @@ check_rust_dependencies() {
     
     cd src-tauri
     
-    # Check if Cargo.lock exists and is up to date
-    cargo check --message-format=short 2>&1 | head -20
+    # Check if Cargo.lock exists and dependencies compile
+    if ! cargo check --message-format=short 2>&1 | head -20; then
+        print_error "Cargo check failed - missing system libraries"
+        print_warning "You may need to install additional system packages"
+        cd ..
+        return 1
+    fi
     
     cd ..
     print_success "Rust dependencies are available"
@@ -356,6 +416,7 @@ main() {
     # Project checks
     print_header "Phase 3: Project Verification"
     check_project_structure
+    generate_tauri_icons
     check_npm_dependencies
     check_rust_dependencies
     
