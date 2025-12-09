@@ -47,6 +47,7 @@ src-tauri/icons/StoreLogo.png
 
 # Release folder (for GitHub releases)
 release/
+release-package
 
 AUTOMATED_STARTUP_SUMMARY.md
 QUICK_START_CHEATSHEET.md
