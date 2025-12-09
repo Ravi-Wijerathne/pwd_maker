@@ -81,7 +81,46 @@ For other Linux distributions, see [Tauri Prerequisites](https://tauri.app/v1/gu
 
 ## 🚀 Getting Started
 
-### 1. Install Dependencies
+### Automated Startup (Recommended)
+
+The easiest way to get started is using the automated startup scripts that check dependencies, install missing components, and launch the application:
+
+#### Linux / macOS / WSL2
+```bash
+chmod +x startup.sh
+./startup.sh
+```
+
+#### Windows (PowerShell)
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+.\startup.ps1
+```
+
+#### Windows (Command Prompt)
+```cmd
+startup.bat
+```
+
+**What the scripts do:**
+- ✅ Detect your operating system
+- ✅ Check for Node.js, Rust, and required dependencies
+- ✅ Automatically install missing components
+- ✅ Verify project structure
+- ✅ Install npm and Cargo packages
+- ✅ Launch the application in development or build mode
+
+When prompted, select:
+- **Option 1** for Development Mode (hot-reload, debugging)
+- **Option 2** for Production Build (optimized installer)
+
+---
+
+### Manual Setup
+
+If you prefer manual setup or the automated scripts don't work:
+
+#### 1. Install Dependencies
 
 ```powershell
 npm install
@@ -89,7 +128,7 @@ npm install
 
 This will install all Node.js dependencies including React, Vite, Tailwind CSS, and Tauri CLI.
 
-### 2. Development Mode
+#### 2. Development Mode
 
 Run the application in development mode with hot-reload:
 
@@ -102,7 +141,7 @@ This command will:
 - Compile the Rust backend
 - Launch the Tauri application window
 
-### 3. Build for Production
+#### 3. Build for Production
 
 Create optimized production builds for your platform:
 
