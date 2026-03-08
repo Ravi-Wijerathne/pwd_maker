@@ -392,7 +392,7 @@ main() {
     
     # Change to project directory
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    cd "$SCRIPT_DIR"
+    cd "$SCRIPT_DIR/.."
     
     # Execute checks in order
     print_header "Phase 1: Core Dependencies"

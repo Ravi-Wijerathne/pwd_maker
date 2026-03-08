@@ -320,6 +320,9 @@ function Start-Application {
 
 function Main {
     try {
+        # Change to project root directory (parent of scripts folder)
+        Set-Location (Split-Path -Parent $PSScriptRoot)
+        
         Write-Header "Password Maker - Automated Setup & Startup (Windows)"
         
         Write-Info "Starting system checks..."
