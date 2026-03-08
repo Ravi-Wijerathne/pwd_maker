@@ -255,6 +255,9 @@ REM MAIN EXECUTION
 REM ============================================================================
 
 :main
+    REM Change to project root directory (parent of scripts folder)
+    cd /d "%~dp0.."
+    
     call :print_header "Password Maker - Automated Setup & Startup (Windows)"
     
     call :print_info "Starting dependency checks..."
